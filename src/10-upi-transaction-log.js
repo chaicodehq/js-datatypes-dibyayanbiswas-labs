@@ -47,5 +47,91 @@
  *   //      frequentContact: "Swiggy", allAbove100: false, hasLargeTransaction: true }
  */
 export function analyzeUPITransactions(transactions) {
-  // Your code here
+  // I would like to pose a cleaner solution, minimising loop - targetting O(n)
+
+  // validate inputs
+  if(!Array.isArray(transactions) || transactions.length === 0) {
+    return null;
+  }
+
+  let totalCredit = 0;
+  let totalDebit = 0;
+  let transactionCount = 0;
+  let highestTransaction = null;
+  const categoryBreakdown = {};
+  const contactFrequency = {};
+  let allAbove100 = true;
+  let hasLargeTransaction = false;
+
+  // maximum calculation done in single loop rather than numberous reduce, filter, sort
+  for(const txn of transactions) {
+    if(
+      typeof txn.amount !== "number" ||
+      txn.amount <= 0 ||
+      (txn.type !== "credit" && txn.type !== "debit")
+    ) {
+      continue;
+    }
+
+    transactionCount++;
+
+    // credit / debit totals - no if else
+    if(txn.type === "credit") {
+      totalCredit += txn.amount
+    }
+
+    if(txn.type === "debit") {
+      totalDebit += txn.amount
+    }
+
+
+    // highest transaction
+    if(!highestTransaction || txn.amount > highestTransaction.amount){
+      highestTransaction = txn;
+    }
+
+    // category breakdown
+    categoryBreakdown[txn.category] = 
+      (categoryBreakdown[txn.category] ?? 0) + txn.amount
+
+    //contact frequency
+    if(!contactFrequency[txn.to]) {
+      contactFrequency[txn.to] = 1
+    }else {
+      contactFrequency[txn.to]++
+    }
+
+    if(txn.amount <= 100) allAbove100 = false;
+    if(txn.amount >= 5000) hasLargeTransaction = true;
+  }
+
+  if(transactionCount === 0) return null;
+
+  const netBalance = totalCredit - totalDebit;
+  const totalAmount = totalCredit + totalDebit;
+  const avgTransaction = Math.round(totalAmount / transactionCount);
+
+  // find frequent contact O(n) 
+  let frequentContact = null;
+  let maxCount = 0;
+  for (const [contact, count] of Object.entries(contactFrequency)) {
+    if (count > maxCount) {
+      maxCount = count;
+      frequentContact = contact;
+    }
+  }
+
+  return {
+    totalCredit,
+    totalDebit,
+    netBalance,
+    transactionCount,
+    avgTransaction,
+    highestTransaction,
+    categoryBreakdown,
+    frequentContact,
+    allAbove100,
+    hasLargeTransaction
+  };
 }
+

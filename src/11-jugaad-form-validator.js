@@ -62,5 +62,103 @@
  *   // => { isValid: false, errors: { name: "...", email: "...", ... } }
  */
 export function validateForm(formData) {
-  // Your code here
+  const errors = {};
+
+  const { 
+    name,
+    email,
+    phone,
+    age, 
+    pincode, 
+    state,
+    agreeTerms,
+  } = formData || {};
+
+  // name validation
+  if(typeof name != "string" || name.trim().length < 2 || name.trim().length > 50) {
+    errors.name = "Name must be 2-50 characters";
+  }
+
+  // email validation
+  if(typeof email !== "string") {
+    errors.email = "Invalid email format";
+  } else {
+    const atIndex = email.indexOf("@");
+    const lastAtIndex = email.lastIndexOf("@");
+    const dotAfterAt = email.indexOf(".", atIndex)
+
+    const hasOneAt = atIndex > 0 && atIndex === lastAtIndex;
+    const hasDotAfterAt = dotAfterAt > (atIndex + 1);
+
+    if(!hasOneAt || !hasDotAfterAt) {
+      errors.email = "Invalid email format";
+    }
+
+  }
+
+  // phone validation
+  if (typeof phone !== "string" || phone.length !== 10) {
+    errors.phone = "Invalid Indian phone number";
+  } else {
+    const validStart = ["6", "7", "8", "9"].includes(phone[0]);
+
+    let allDigits = true;
+    for (let char of phone) {
+      if (char < "0" || char > "9") {
+        allDigits = false;
+        break;
+      }
+    }
+
+    if (!validStart || !allDigits) {
+      errors.phone = "Invalid Indian phone number";
+    }
+  }
+
+  // age validation
+  let parsedAge = age;
+
+  if (typeof age === "string") {
+    parsedAge = parseInt(age, 10);
+  }
+
+  if (
+    isNaN(parsedAge) ||
+    !Number.isInteger(parsedAge) ||
+    parsedAge < 16 ||
+    parsedAge > 100
+  ) {
+    errors.age = "Age must be an integer between 16 and 100";
+  }
+
+  // picode
+  if (typeof pincode !== "string" || pincode.length !== 6 || pincode.startsWith("0")) {
+    errors.pincode = "Invalid Indian pincode";
+  } else {
+    for (let char of pincode) {
+      if (char < "0" || char > "9") {
+        errors.pincode = "Invalid Indian pincode";
+        break;
+      }
+    }
+  }
+
+  // state 
+  const safeState = state?.trim?.() ?? "";
+
+  if (safeState.length === 0) {
+    errors.state = "State is required";
+  }
+
+  // terms
+ if (Boolean(agreeTerms) !== true) {
+    errors.agreeTerms = "Must agree to terms";
+  }
+
+  const isValid = Object.keys(errors).length === 0;
+
+  return {
+    isValid,
+    errors
+  };
 }

@@ -39,5 +39,56 @@
  *   //      text: "I love this song", wordCount: 4, sentiment: "love" }
  */
 export function parseWhatsAppMessage(message) {
-  // Your code here
+  
+  // validation
+  if (typeof message !== "string") return null;
+  if (!message.includes(" - ") || !message.includes(": ")) return null;
+
+  const commaIndex = message.indexOf(", ");
+  const dashIndex = message.indexOf(" - ");
+  const colonIndex = message.indexOf(": ", dashIndex);
+
+  if (commaIndex === -1 || dashIndex === -1 || colonIndex === -1) {
+    return null;
+  }
+
+  // extract parts
+  const date = message.slice(0, commaIndex);
+  const time = message.slice(commaIndex + 2, dashIndex);
+  const sender = message.slice(dashIndex + 3, colonIndex);
+  const text = message.slice(colonIndex + 2).trim();
+
+  // word count
+  const wordCount = text
+    .split(" ")
+    .filter(word => word.trim().length > 0).length;
+
+  // sentiment detection
+  const lowerText = text.toLowerCase();
+
+  const isFunny =
+    lowerText.includes("😂") ||
+    lowerText.includes(":)") ||
+    lowerText.includes("haha");
+
+  const isLove =
+    lowerText.includes("❤") ||
+    lowerText.includes("love") ||
+    lowerText.includes("pyaar");
+
+  let sentiment = "neutral";
+  if (isFunny) {
+    sentiment = "funny";
+  } else if (isLove) {
+    sentiment = "love";
+  }
+
+  return {
+    date,
+    time,
+    sender,
+    text,
+    wordCount,
+    sentiment,
+  };
 }

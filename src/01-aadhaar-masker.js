@@ -28,5 +28,19 @@
  *   // => "INVALID"
  */
 export function maskAadhaar(aadhaarNumber) {
-  // Your code here
+  
+  if (typeof aadhaarNumber !== "string") return "INVALID"
+  if(aadhaarNumber.length !== 12) return "INVALID"
+  if(!aadhaarNumber.match("^[0-9]*$")) return "INVALID"
+  
+  // extract last 4 digits of aadhar
+  const lastFourDigitOfAadhar = aadhaarNumber.slice(8,12);
+
+  // X is our mask character
+  const maskChar = "X";
+
+  //formatting to XXXX-XXXX-1234
+  const maskedAadharNumber = maskChar.repeat(4) + "-" + maskChar.repeat(4) + "-" + lastFourDigitOfAadhar;
+
+  return maskedAadharNumber;
 }
